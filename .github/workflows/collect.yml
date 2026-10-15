@@ -1,0 +1,47 @@
+name: collect
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore database from data branch
+        run: |
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin data; then
+            git fetch origin data
+            git show origin/data:data/wars.db > data/wars.db
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv
+
+      - name: Collect
+        env:
+          COC_API_KEY: ${{ secrets.COC_API_KEY }}
+          COC_BASE_URL: ${{ secrets.COC_BASE_URL }}
+          RUN_ONCE: "1"
+        run: python src/collector.py
+
+      - name: Save database to data branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan data-new
+          git rm -rf --cached . > /dev/null
+          git add -f data/wars.db
+          git commit -m "Update wars.db"
+          git push -f origin data-new:data
