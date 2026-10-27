@@ -156,18 +156,18 @@ On Windows PowerShell, use `cmd /c "git show origin/data:data/wars.db > data\war
 
 ## Results
 
-_Interim results; the dataset is still growing._
+_Preliminary; the dataset is still growing._
 
-Phase 1 (Town Hall features only), time-series cross-validation on 80 test wars from 99 labeled wars:
+Comparison on 128 decided wars with complete player data (time-ordered cross-validation, tested on 105 wars). All models use the same wars.
 
-| Model | Accuracy | ROC-AUC |
+| Model | Accuracy | Log loss |
 |---|---|---|
-| Rule: higher TH sum wins | 0.463 | n/a |
-| Logistic regression (TH sum only) | 0.537 | 0.515 |
-| Logistic regression (all Phase 1 features) | 0.487 | 0.422 |
-| XGBoost (all Phase 1 features) | 0.475 | 0.501 |
+| Constant (predicts the training win rate) | 0.543 | 0.697 |
+| Phase 1: Town Hall sum | 0.533 | 0.699 |
+| Phase 2: player strength | 0.619 | 0.631 |
+| Phase 1 + Phase 2 | 0.619 | 0.647 |
 
-Accuracy has a standard error of about ±0.056 at this sample size, so every result is statistically indistinguishable from chance. Town Hall features alone show no detectable signal so far, which is plausible given that matchmaking pairs clans with similar lineups. This is the baseline that Phase 2 (player-strength features) will be compared against.
+Town Hall level alone does no better than predicting the training win rate. Adding player-strength features (hero levels, hero equipment, war stars) improves log loss by 0.068 ± 0.038 (about 1.8 standard errors), which is suggestive but not yet statistically confirmed. Accuracy has a standard error of about ±0.05 at this sample size. The feature set was fixed before the Phase 2 comparison was first run.
 
 ## Limitations
 
@@ -177,6 +177,7 @@ Accuracy has a standard error of about ±0.056 at this sample size, so every res
 - **Matchmaking.** Clans are paired against similar opponents, so Town Hall differences are often small, which may limit what the baseline can learn.
 - **Noisy player stats.** Some fields (such as season attack and defense wins) are often zero for war-focused players.
 - **Ties** are rare and excluded from training.
+- - **Draws are common and excluded.** About a quarter of finished wars end in an exact tie, where both clans 3-star every base. These are likely coordinated "farming" wars between clans, and they have no winner to predict. Models are trained and evaluated only on decided wars, so results apply to wars that have a winner. Draws are not predicted.
 
 ## Roadmap
 
