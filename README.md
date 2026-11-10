@@ -158,16 +158,16 @@ On Windows PowerShell, use `cmd /c "git show origin/data:data/wars.db > data\war
 
 _Preliminary; the dataset is still growing._
 
-Comparison on 128 decided wars with complete player data (time-ordered cross-validation, tested on 105 wars). All models use the same wars.
+Comparison on 277 decided wars with complete player data (time-ordered cross-validation, tested on 230 wars). All models use the same wars.
 
 | Model | Accuracy | Log loss |
 |---|---|---|
-| Constant (predicts the training win rate) | 0.543 | 0.697 |
-| Phase 1: Town Hall sum | 0.533 | 0.699 |
-| Phase 2: player strength | 0.619 | 0.631 |
-| Phase 1 + Phase 2 | 0.619 | 0.647 |
+| Constant (predicts the training win rate) | 0.504 | 0.711 |
+| Phase 1: Town Hall sum | 0.500 | 0.714 |
+| Phase 2: player strength | 0.643 | 0.678 |
+| Phase 1 + Phase 2 | 0.643 | 0.675 |
 
-Town Hall level alone does no better than predicting the training win rate. Adding player-strength features (hero levels, hero equipment, war stars) improves log loss by 0.068 ± 0.038 (about 1.8 standard errors), which is suggestive but not yet statistically confirmed. Accuracy has a standard error of about ±0.05 at this sample size. The feature set was fixed before the Phase 2 comparison was first run.
+Town Hall level alone does no better than chance. Player-strength features (hero levels, hero equipment, war stars) raise accuracy to about 64% (standard error ±0.03) and beat the Town Hall model on accuracy in each of the five time-ordered folds, with per-fold ROC-AUC between 0.57 and 0.70. The log loss improvement is small and not yet statistically confirmed (+0.035 ± 0.026, about 1.4 standard errors), and it has shrunk as the dataset grew (+0.104 at 76 wars, +0.068 at 128, +0.035 at 277), so the true effect is probably modest. Standard errors assume independent wars, but the same clans appear in many wars, so they are somewhat optimistic. The feature set was fixed before the Phase 2 comparison was first run.
 
 ## Limitations
 
