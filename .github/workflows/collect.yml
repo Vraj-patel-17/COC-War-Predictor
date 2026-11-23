@@ -20,7 +20,11 @@ jobs:
           mkdir -p data
           if git ls-remote --exit-code --heads origin data; then
             git fetch origin data
-            git show origin/data:data/wars.db > data/wars.db
+            if git cat-file -e origin/data:data/wars.db.gz 2>/dev/null; then
+              git show origin/data:data/wars.db.gz | gunzip > data/wars.db
+            elif git cat-file -e origin/data:data/wars.db 2>/dev/null; then
+              git show origin/data:data/wars.db > data/wars.db
+            fi
           fi
 
       - uses: actions/setup-python@v5
@@ -38,10 +42,12 @@ jobs:
 
       - name: Save database to data branch
         run: |
+          gzip -9 -c data/wars.db > data/wars.db.gz
+          ls -lh data/wars.db data/wars.db.gz
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
           git checkout --orphan data-new
           git rm -rf --cached . > /dev/null
-          git add -f data/wars.db
-          git commit -m "Update wars.db"
+          git add -f data/wars.db.gz
+          git commit -m "Update wars.db.gz"
           git push -f origin data-new:data
